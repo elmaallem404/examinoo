@@ -1,0 +1,7 @@
+#igore .env file
+node/_modules/
+.env
+.vscode/
+dist/
+build/
+.DS_Store

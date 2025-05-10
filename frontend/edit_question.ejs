@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Question</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script>
+    function toggleQuestionType() {
+      const type = document.getElementById("questionType").value;
+      const qcmSection = document.getElementById("qcmSection");
+      const directSection = document.getElementById("directSection");
+      const optionInputs = document.querySelectorAll('input[name="options[]"]');
+      const directAnswer = document.getElementById("directAnswer");
+
+      if (type === "qcm") {
+        qcmSection.style.display = "block";
+        directSection.style.display = "none";
+        optionInputs.forEach(input => input.required = true);
+        if (directAnswer) directAnswer.required = false;
+      } else if (type === "direct") {
+        qcmSection.style.display = "none";
+        directSection.style.display = "block";
+        optionInputs.forEach(input => input.required = false);
+        if (directAnswer) directAnswer.required = true;
+      } else {
+        qcmSection.style.display = "none";
+        directSection.style.display = "none";
+        optionInputs.forEach(input => input.required = false);
+        if (directAnswer) directAnswer.required = false;
+      }
+
+      toggleSaveButton();
+    }
+
+    function addOption() {
+      const container = document.getElementById("qcmOptions");
+      const count = container.children.length + 1;
+      const div = document.createElement("div");
+      div.classList.add("input-group", "mb-2");
+      div.innerHTML = `
+        <div class="input-group-text">
+          <input type="checkbox" name="correctOptions" value="${count}">
+        </div>
+        <input type="text" name="options[]" class="form-control" placeholder="Option ${count}" required>
+      `;
+      container.appendChild(div);
+      toggleSaveButton();
+    }
+
+    function toggleSaveButton() {
+      const saveButton = document.querySelector('button[type="submit"]');
+      const type = document.getElementById("questionType").value;
+      let isValid = true;
+
+      if (type === "qcm") {
+        const optionInputs = document.querySelectorAll('#qcmSection input[name="options[]"]');
+        isValid = Array.from(optionInputs).every(input => input.value.trim() !== '');
+      } else if (type === "direct") {
+        const answer = document.getElementById("directAnswer").value.trim();
+        isValid = answer !== '';
+      }
+
+      saveButton.disabled = !isValid;
+    }
+
+    document.addEventListener("input", toggleSaveButton);
+    window.addEventListener("load", toggleQuestionType);
+  </script>
+</head>
+<body class="container py-5" onload="toggleQuestionType()">
+  <h2 class="mb-4">Edit Question</h2>
+  <form action="/question/<%= question.id %>/edit" method="POST">
+    <input type="hidden" name="examId" value="<%= question.exam_id %>">
+    <div class="mb-3">
+      <label for="questionType" class="form-label">Question Type</label>
+      <select id="questionType" name="type" class="form-select" onchange="toggleQuestionType()" required>
+        <option value="qcm" <%= question.type === 'qcm' ? 'selected' : '' %>>QCM</option>
+        <option value="direct" <%= question.type === 'direct' ? 'selected' : '' %>>Direct</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label for="questionText" class="form-label">Question Text</label>
+      <textarea name="text" id="questionText" class="form-control" rows="3" required><%= question.text %></textarea>
+    </div>
+    <div class="mb-3">
+      <label for="duration" class="form-label">Duration (in seconds)</label>
+      <input type="number" name="duration" id="duration" class="form-control" min="10" value="<%= question.duration %>" required>
+    </div>
+    <div id="qcmSection" style="display: none;">
+      <label class="form-label">Options</label>
+      <div id="qcmOptions">
+        <% if (question.options && question.options.length > 0) { %>
+          <% question.options.forEach((option, index) => { %>
+            <div class="input-group mb-2">
+              <div class="input-group-text">
+                <input type="checkbox" name="correctOptions" value="<%= index + 1 %>" <%= option.isCorrect ? 'checked' : '' %>>
+              </div>
+              <input type="text" name="options[]" class="form-control" placeholder="Option <%= index + 1 %>" value="<%= option.text %>" required>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <div class="input-group mb-2">
+            <div class="input-group-text">
+              <input type="checkbox" name="correctOptions" value="1">
+            </div>
+            <input type="text" name="options[]" class="form-control" placeholder="Option 1" required>
+          </div>
+          <div class="input-group mb-2">
+            <div class="input-group-text">
+              <input type="checkbox" name="correctOptions" value="2">
+            </div>
+            <input type="text" name="options[]" class="form-control" placeholder="Option 2" required>
+          </div>
+        <% } %>
+      </div>
+      <button type="button" class="btn btn-outline-primary btn-sm" onclick="addOption()">Add Option</button>
+    </div>
+    <div id="directSection" style="display: none;" class="mb-3">
+      <label for="directAnswer" class="form-label">Answer</label>
+      <input type="text" name="answer" id="directAnswer" class="form-control" placeholder="Enter the correct answer" value="<%= question.answer || '' %>" required>
+    </div>
+    <div class="mb-3">
+      <label for="score" class="form-label">Score</label>
+      <input type="number" name="score" id="score" class="form-control" min="1" value="<%= question.score %>" required>
+    </div>
+    <button type="submit" class="btn btn-success" disabled>Save Changes</button>
+    <a href="/welcome" class="btn btn-secondary">Back</a>
+  </form>
+</body>
+</html>

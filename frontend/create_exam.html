@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Exam</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+  <div class="container mt-5">
+    <div class="card shadow p-4">
+      <h3 class="text-center mb-4">Create Exam</h3>
+      <form action="/create-exam" method="POST">
+        <div class="mb-3">
+          <label class="form-label">Exam Title</label>
+          <input type="text" class="form-control" name="examTitle" required>
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label">Exam Description</label>
+          <textarea class="form-control" name="examDescription" rows="4" required></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Target Audience</label>
+          <input type="text" class="form-control" name="targetAudience" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Duration (in minutes)</label>
+          <input type="number" class="form-control" name="duration" required>
+        </div>
+
+        <div class="d-grid">
+          <button type="submit" class="btn btn-primary">Create Exam</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
